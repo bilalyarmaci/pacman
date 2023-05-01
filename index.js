@@ -12,32 +12,44 @@ class Boundary {
     static width = 40;
     static height = 40;
     // Canvas'a çizmek için gerekli olacak pozisyon (x, y) ve genişlil-yükseklik parametrelerini ayarlayan yapıcı (constructor)
-    constructor({ position }) {
+    constructor({ position, image }) {
         this.position = position;
         this.width = Boundary.width;
         this.height = Boundary.height;
+        this.image = image
     }
-    // Nesneyi ekrana çizdiren metot
+    // Sınırı ekrana çizdiren metot
     draw() {
-        ctx.fillStyle = 'blue';
-        ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+        ctx.drawImage(this.image, this.position.x, this.position.y);
     }
 }
 
-// Sınırı oluşturan blok parçalarını tutan dizi, yani sınırın ta kendisi
+// Sınırı oluşturan resimleri tutan dizi, yani sınırın ta kendisi
 const boundaries = [];
 
 // Sınırları temsil eden harita
 // '-' sembolü sınırı oluşturan blok parçacığını (kare) temsil ediyor.
 const map = [
-    ['-', '-', '-', '-', '-', '-', '-'],
-    ['-', ' ', ' ', ' ', ' ', ' ', '-'],
-    ['-', ' ', '-', ' ', '-', ' ', '-'],
-    ['-', ' ', ' ', ' ', ' ', ' ', '-'],
-    ['-', ' ', '-', ' ', '-', ' ', '-'],
-    ['-', ' ', ' ', ' ', ' ', ' ', '-'],
-    ['-', '-', '-', '-', '-', '-', '-']
+    ['1', '-', '-', '-', '-', '-', '-', '-', '-', '-', '2'],
+    ['|', '.', '.', '.', '.', '.', '.', '.', '.', '.', '|'],
+    ['|', '.', 'b', '.', '[', '7', ']', '.', 'b', '.', '|'],
+    ['|', '.', '.', '.', '.', '_', '.', '.', '.', '.', '|'],
+    ['|', '.', '[', ']', '.', '.', '.', '[', ']', '.', '|'],
+    ['|', '.', '.', '.', '.', '^', '.', '.', '.', '.', '|'],
+    ['|', '.', 'b', '.', '[', '+', ']', '.', 'b', '.', '|'],
+    ['|', '.', '.', '.', '.', '_', '.', '.', '.', '.', '|'],
+    ['|', '.', '[', ']', '.', '.', '.', '[', ']', '.', '|'],
+    ['|', '.', '.', '.', '.', '^', '.', '.', '.', '.', '|'],
+    ['|', '.', 'b', '.', '[', '5', ']', '.', 'b', '.', '|'],
+    ['|', '.', '.', '.', '.', '.', '.', '.', '.', 'p', '|'],
+    ['4', '-', '-', '-', '-', '-', '-', '-', '-', '-', '3']
 ];
+
+function getImage(img) {
+    let image = new Image();
+    image.src = img;
+    return image;
+}
 
 // Harita satırlarını tarar
 // row = satır, i = mevcut satır numarası
@@ -46,12 +58,183 @@ map.forEach((row, i) => {
         // symbol = o anki indisteki (sütundaki) eleman, j = mevcut indis (sütun) numarası
         switch (symbol) {
             case '-':
-                boundaries.push(new Boundary({  // '-' bulunması durumunda sınırı oluşturan diziye blok eklemesi yapılır. Halihazırdaki satır ve sütun değerleri dikkate alınarak pozisyon ataması yapılır.
-                    position: {
-                        x: Boundary.width * j,
-                        y: Boundary.height * i
-                    }
-                }));
+                boundaries.push(
+                    new Boundary({  // '-' bulunması durumunda sınırı oluşturan diziye blok eklemesi yapılır. Halihazırdaki satır ve sütun değerleri dikkate alınarak pozisyon ataması yapılır.
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * i
+                        },
+                        image: getImage('img/pipeHorizontal.png')
+                    })
+                );
+                break;
+            case '|':
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * i
+                        },
+                        image: getImage('./img/pipeVertical.png')
+                    })
+                );
+                break;
+            case '1':
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * i
+                        },
+                        image: getImage('./img/pipeCorner1.png')
+                    })
+                );
+                break;
+            case '2':
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * i
+                        },
+                        image: getImage('./img/pipeCorner2.png')
+                    })
+                );
+                break;
+            case '3':
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * i
+                        },
+                        image: getImage('./img/pipeCorner3.png')
+                    })
+                );
+                break;
+            case '4':
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * i
+                        },
+                        image: getImage('./img/pipeCorner4.png')
+                    })
+                );
+                break;
+            case 'b':
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: Boundary.width * j,
+                            y: Boundary.height * i
+                        },
+                        image: getImage('./img/block.png')
+                    })
+                );
+                break;
+            case '[':
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: j * Boundary.width,
+                            y: i * Boundary.height
+                        },
+                        image: getImage('./img/capLeft.png')
+                    })
+                );
+                break;
+            case ']':
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: j * Boundary.width,
+                            y: i * Boundary.height
+                        },
+                        image: getImage('./img/capRight.png')
+                    })
+                );
+                break;
+            case '_':
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: j * Boundary.width,
+                            y: i * Boundary.height
+                        },
+                        image: getImage('./img/capBottom.png')
+                    })
+                );
+                break;
+            case '^':
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: j * Boundary.width,
+                            y: i * Boundary.height
+                        },
+                        image: getImage('./img/capTop.png')
+                    })
+                );
+                break;
+            case '+':
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: j * Boundary.width,
+                            y: i * Boundary.height
+                        },
+                        image: getImage('./img/pipeCross.png')
+                    })
+                );
+                break;
+            case '5':
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: j * Boundary.width,
+                            y: i * Boundary.height
+                        },
+                        color: 'blue',
+                        image: getImage('./img/pipeConnectorTop.png')
+                    })
+                );
+                break;
+            case '6':
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: j * Boundary.width,
+                            y: i * Boundary.height
+                        },
+                        color: 'blue',
+                        image: getImage('./img/pipeConnectorRight.png')
+                    })
+                );
+                break;
+            case '7':
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: j * Boundary.width,
+                            y: i * Boundary.height
+                        },
+                        color: 'blue',
+                        image: getImage('./img/pipeConnectorBottom.png')
+                    })
+                );
+                break;
+            case '8':
+                boundaries.push(
+                    new Boundary({
+                        position: {
+                            x: j * Boundary.width,
+                            y: i * Boundary.height
+                        },
+                        image: getImage('./img/pipeConnectorLeft.png')
+                    })
+                );
                 break;
         }
     });
@@ -84,7 +267,7 @@ class Pacman {
 
 // Pacman nesnesi
 const pacman = new Pacman({
-    // "Pacman"in koordinatlar sınırın (duvarın) içinde kalacak şekilde sınır koordinatlarının değerleri üzerinden verilir
+    // "Pacman"in koordinatları sınırın (duvarın) içinde kalacak şekilde sınır koordinatlarının değerleri üzerinden verilir
     position: {
         x: Boundary.width + Boundary.width / 2,
         y: Boundary.height + Boundary.height / 2
