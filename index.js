@@ -24,8 +24,66 @@ class Boundary {
     }
 }
 
+// Pacman sınıfı
+class Pacman {
+    // Boundary sınıfındaki yapıcının benzeri
+    // Daire oluşturulduğundan yarıçap (radius) değeri de gereklidir
+    constructor({ position, velocity }) {
+        this.position = position;
+        this.velocity = velocity;
+        this.radius = 15;
+    }
+    // Nesneyi ("pacman"i) ekrana çizdiren metot
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'yellow';
+        ctx.fill();
+        ctx.closePath();
+    }
+    // Hareket efekti için pozisyon (x ve y koordinatları) güncellemesi yaparak 'draw' metodunu çağıran metot
+    move() {
+        this.draw();
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
+    }
+}
+
+// Pellet (hap/top) sınıfı
+class Pellet {
+    // Pacman sınıfındaki yapıcının benzeri
+    constructor({ position, velocity }) {
+        this.position = position;
+        this.radius = 3;
+    }
+    // Hapı ekrana çizdiren metot
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.closePath();
+    }
+}
+
+// Pacman nesnesi oluşturuluyor
+const pacman = new Pacman({
+    // "Pacman"in koordinatları sınırın (duvarın) içinde kalacak şekilde sınır koordinatlarının değerleri üzerinden verilir
+    position: {
+        x: Boundary.width + Boundary.width / 2,
+        y: Boundary.height + Boundary.height / 2
+    },
+    velocity: { // Başlangıç hızı yok - hareket yok
+        x: 0,
+        y: 0
+    }
+});
+
 // Sınırı oluşturan resimleri tutan dizi, yani sınırın ta kendisi
 const boundaries = [];
+// Oluşturulan hapları tutacak dizi
+const pellets = []
+
 
 // Sınırları temsil eden harita
 // '-' sembolü sınırı oluşturan blok parçacığını (kare) temsil ediyor.
@@ -45,13 +103,14 @@ const map = [
     ['4', '-', '-', '-', '-', '-', '-', '-', '-', '-', '3']
 ];
 
+// Her bir karakter için gerekli resmi oluşturmak için tanımlanan metot
 function getImage(img) {
     let image = new Image();
     image.src = img;
     return image;
 }
 
-// Harita satırlarını tarar
+// Oluşturulan harita şablonu kullanılarak haritanın oluşturulması için dizilerin doldurulması
 // row = satır, i = mevcut satır numarası
 map.forEach((row, i) => {
     row.forEach((symbol, j) => { // Satırdaki her elemanı karşılaştırmak için satır içi tarama
@@ -236,46 +295,18 @@ map.forEach((row, i) => {
                     })
                 );
                 break;
+            case '.':
+                pellets.push(
+                    new Pellet({
+                        position: {
+                            x: j * Boundary.width + Boundary.width / 2,
+                            y: i * Boundary.height + Boundary.height / 2
+                        }
+                    })
+                );
+                break;
         }
     });
-});
-
-// Pacman sınıfı
-class Pacman {
-    // Boundary sınıfındaki yapıcının benzeri
-    // Daire oluşturulduğundan yarıçap (radius) değeri de gereklidir
-    constructor({ position, velocity }) {
-        this.position = position;
-        this.velocity = velocity;
-        this.radius = 15;
-    }
-    // Nesneyi ("pacman"i) ekrana çizdiren metot
-    draw() {
-        ctx.beginPath();
-        ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'yellow';
-        ctx.fill();
-        ctx.closePath();
-    }
-    // Hareket efekti için pozisyon (x ve y koordinatları) güncellemesi yaparak 'draw' metodunu çağıran metot
-    move() {
-        this.draw();
-        this.position.x += this.velocity.x;
-        this.position.y += this.velocity.y;
-    }
-}
-
-// Pacman nesnesi
-const pacman = new Pacman({
-    // "Pacman"in koordinatları sınırın (duvarın) içinde kalacak şekilde sınır koordinatlarının değerleri üzerinden verilir
-    position: {
-        x: Boundary.width + Boundary.width / 2,
-        y: Boundary.height + Boundary.height / 2
-    },
-    velocity: { // Başlangıç hızı yok - hareket yok
-        x: 0,
-        y: 0
-    }
 });
 
 // Basılan klavye tuşlarını tutan dizi
@@ -445,6 +476,10 @@ function animate() {
             pacman.velocity.y = 0;
         };
     });
+
+    pellets.forEach((pellet) => {
+        pellet.draw();
+    })
 
     pacman.move(); // pacman nesnesinin hareketi için ilgili metot çağırısı
 }
