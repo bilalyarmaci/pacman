@@ -1,6 +1,8 @@
-// Canvas ve context tanımlamaları
+// Gerekli tanılamalar
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
+let scoreElement = document.querySelector('#score');
+let score = 0
 
 // Canvas boyut ayarlaması
 canvas.width = innerWidth;
@@ -485,6 +487,8 @@ function animate() {
         // Pacman ile hapın çarpışıp çarpışmadığının kontrolü. Sonucunda çarpışan hap diziden silinir.
         if (Math.hypot(pellet.position.x - pacman.position.x, pellet.position.y - pacman.position.y) < pellet.radius + pacman.radius) {
             pellets.splice(i, 1);
+            score += 10
+            scoreElement.innerHTML = score;
         }
     }
 
