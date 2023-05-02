@@ -30,6 +30,7 @@ class Boundary {
 class Pacman {
     // Boundary sınıfındaki yapıcının benzeri
     // Daire oluşturulduğundan yarıçap (radius) değeri de gereklidir
+    static speed = 2.5      // "Pacman"in hız ayarı için kullanılıyor
     constructor({ position, velocity }) {
         this.position = position;
         this.velocity = velocity;
@@ -44,6 +45,33 @@ class Pacman {
         ctx.closePath();
     }
     // Hareket efekti için pozisyon (x ve y koordinatları) güncellemesi yaparak 'draw' metodunu çağıran metot
+    move() {
+        this.draw();
+        this.position.x += this.velocity.x;
+        this.position.y += this.velocity.y;
+    }
+}
+
+// Hayalet (ghost) sınıfı
+class Ghost {
+    static speed = 1.5
+    // Pacman sınıfındaki yapıcının benzeri
+    constructor({ position, velocity, color = 'red' }) {
+        this.position = position;
+        this.velocity = velocity;
+        this.radius = 15;
+        this.color = color
+        this.prevCollisions = []
+    }
+    // Hayaleti ekrana çizdiren metot
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+    }
+    // Hareket efekti için pozisyon (x ve y koordinatları) güncellemesi yaparak 'draw' metodunu çağırır
     move() {
         this.draw();
         this.position.x += this.velocity.x;
@@ -81,11 +109,21 @@ const pacman = new Pacman({
     }
 });
 
-// Sınırı oluşturan resimleri tutan dizi, yani sınırın ta kendisi
-const boundaries = [];
-// Oluşturulan hapları tutacak dizi
-const pellets = []
-
+const boundaries = [];  // Sınırı oluşturan resimleri tutan dizi, yani sınırın ta kendisi
+const pellets = [];  // Oluşturulan hapları tutan dizi
+// Oluşturulan hayaletleri tutan dizi
+const ghosts = [
+    new Ghost({
+        position: {
+            x: Boundary.width * 6 + Boundary.width / 2,
+            y: Boundary.height + Boundary.height / 2
+        },
+        velocity: {
+            x: Ghost.speed,
+            y: 0
+        }
+    })
+];
 
 // Oyun haritasının temsili şablonu
 const map = [
@@ -367,9 +405,11 @@ addEventListener('keyup', ({ key }) => {
     }
 });
 
-// "Pacman"in tek bir sınır bloğuyla çarpışıp çarpışmadığını hesplayıp döndüren metot
+// Nesnenin (pacman,hayalet) tek bir sınır bloğuyla çarpışıp çarpışmadığını hesplayıp döndüren metot
 function isColliding({ circle, rectangle }) {
-    return (circle.position.x - circle.radius + circle.velocity.x <= rectangle.position.x + rectangle.width && circle.position.x + circle.radius + circle.velocity.x >= rectangle.position.x && circle.position.y - circle.radius + circle.velocity.y <= rectangle.position.y + rectangle.height && circle.position.y + circle.radius + circle.velocity.y >= rectangle.position.y)
+    // Hızın değiştirilmesi durumunda doğru ölçüm için 'padding' kullanılmakta
+    const padding = Boundary.width / 2 - circle.radius - 1;
+    return (circle.position.x - circle.radius + circle.velocity.x <= rectangle.position.x + rectangle.width + padding && circle.position.x + circle.radius + circle.velocity.x >= rectangle.position.x - padding && circle.position.y - circle.radius + circle.velocity.y <= rectangle.position.y + rectangle.height + padding && circle.position.y + circle.radius + circle.velocity.y >= rectangle.position.y - padding)
 }
 
 // Canvas içerisindeki tüm çizimlerin tekrarlı bir biçimde çağırılmasıyla animasyon görünümü oluşturmakla sorumlu metot
@@ -394,7 +434,7 @@ function animate() {
                     ...pacman,
                     velocity: {
                         x: 0,
-                        y: -5
+                        y: -Pacman.speed
                     }
                 },
                 rectangle: boundary
@@ -403,7 +443,7 @@ function animate() {
                 pacman.velocity.y = 0;
                 break;
             } else {
-                pacman.velocity.y = -5;
+                pacman.velocity.y = -Pacman.speed;
             }
         }
     } else if (keys.s.pressed && lastKey === 's') {
@@ -414,7 +454,7 @@ function animate() {
                     ...pacman,
                     velocity: {
                         x: 0,
-                        y: 5
+                        y: Pacman.speed
                     }
                 },
                 rectangle: boundary
@@ -423,7 +463,7 @@ function animate() {
                 pacman.velocity.y = 0;
                 break;
             } else {
-                pacman.velocity.y = 5;
+                pacman.velocity.y = Pacman.speed;
             }
         }
     } else if (keys.a.pressed && lastKey === 'a') {
@@ -433,7 +473,7 @@ function animate() {
                 circle: {
                     ...pacman,
                     velocity: {
-                        x: -5,
+                        x: -Pacman.speed,
                         y: 0
                     }
                 },
@@ -443,7 +483,7 @@ function animate() {
                 pacman.velocity.x = 0;
                 break;
             } else {
-                pacman.velocity.x = -5;
+                pacman.velocity.x = -Pacman.speed;
             }
         }
     } else if (keys.d.pressed && lastKey === 'd') {
@@ -453,7 +493,7 @@ function animate() {
                 circle: {
                     ...pacman,
                     velocity: {
-                        x: 5,
+                        x: Pacman.speed,
                         y: 0
                     }
                 },
@@ -463,7 +503,7 @@ function animate() {
                 pacman.velocity.x = 0;
                 break;
             } else {
-                pacman.velocity.x = 5;
+                pacman.velocity.x = Pacman.speed;
             }
         }
     }
@@ -483,7 +523,7 @@ function animate() {
     for (let i = pellets.length - 1; i > 0; i--) {
         let pellet = pellets[i];
         pellet.draw();
-        
+
         // Pacman ile hapın çarpışıp çarpışmadığının kontrolü. Sonucunda çarpışan hap diziden silinir.
         if (Math.hypot(pellet.position.x - pacman.position.x, pellet.position.y - pacman.position.y) < pellet.radius + pacman.radius) {
             pellets.splice(i, 1);
@@ -491,6 +531,118 @@ function animate() {
             scoreElement.innerHTML = score;
         }
     }
+
+    // Dizideki tüm hayaletler için
+    ghosts.forEach((ghost) => {
+        ghost.move();
+        // Her blok parçası için ona bir sonraki harekette çarpmaya neden olacak yön bilgisini tutan dizi
+        const collisions = []
+        /* Mevcut hayalet için her blok parçası kontrol ediliyor.
+        Eğer dizide çarpılacak yön bilgisi zaten mevcut değilse ve bir sonraki adımda o yönde bir çarpma olacaksa yön bilgisi diziye ekleniyor. */
+        boundaries.forEach((boundary) => {
+            if (!collisions.includes('up') && isColliding({
+                circle: {
+                    ...ghost,
+                    velocity: {
+                        x: 0,
+                        y: -Ghost.speed
+                    }
+                },
+                rectangle: boundary
+            })
+            ) { collisions.push('up'); }
+            if (!collisions.includes('down') && isColliding({
+                circle: {
+                    ...ghost,
+                    velocity: {
+                        x: 0,
+                        y: Ghost.speed
+                    }
+                },
+                rectangle: boundary
+            })
+            ) { collisions.push('down'); }
+            if (!collisions.includes('left') && isColliding({
+                circle: {
+                    ...ghost,
+                    velocity: {
+                        x: -Ghost.speed,
+                        y: 0
+                    }
+                },
+                rectangle: boundary
+            })
+            ) { collisions.push('left'); }
+            if (!collisions.includes('right') && isColliding({
+                circle: {
+                    ...ghost,
+                    velocity: {
+                        x: Ghost.speed,
+                        y: 0
+                    }
+                },
+                rectangle: boundary
+            })
+            ) { collisions.push('right'); }
+        })
+
+        // Eğer yeni bir yön bilgisi geldi ise bir önceki yönleri tutan dizi güncelleniyor
+        if (collisions.length > ghost.prevCollisions.length) {
+            ghost.prevCollisions = collisions;
+        }
+
+        // Eğer mevcut ('prevCollisions' mevcut durumu gösterir, adlandırma kafa karışıklığına sebep olmasın) yönler ile bir sonraki adımdaki yönler ('collisions') farklı ise, o zaman yeni bir yön açılmış/kapanmış demektir.
+        if (JSON.stringify(collisions) !== JSON.stringify(ghost.prevCollisions)) {
+            // Halihazırda gitmekte olduğu yön 'prevCollisions'a eklenir
+            if (ghost.velocity.x > 0) {
+                ghost.prevCollisions.push('right');
+            } else if (ghost.velocity.x < 0) {
+                ghost.prevCollisions.push('left');
+            }
+            if (ghost.velocity.y < 0) {
+                ghost.prevCollisions.push('up');
+            } else if (ghost.velocity.y > 0) {
+                ghost.prevCollisions.push('down');
+            }
+
+            console.log(collisions)
+            console.log(ghost.prevCollisions)
+
+            // Gidilebilecek açık yönler; mevcut durumda olup, bir sonraki durumda olmayan yönler
+            const pathways = ghost.prevCollisions.filter(collision => {
+                return !collisions.includes(collision);
+            })
+
+            console.log({ pathways });
+
+            // Gidilecek yönün rastgele seçimi
+            // Buraya halihazırda gidilen yön de dahildir.
+            const direction = pathways[Math.floor(Math.random() * pathways.length)]
+
+            console.log({ direction });
+
+            // Yön seçimine göre yön değişimini yapan switch-case yapısı
+            switch (direction) {
+                case 'right':
+                    ghost.velocity.x = Ghost.speed;
+                    ghost.velocity.y = 0;
+                    break;
+                case 'left':
+                    ghost.velocity.x = -Ghost.speed;
+                    ghost.velocity.y = 0;
+                    break;
+                case 'up':
+                    ghost.velocity.x = 0;
+                    ghost.velocity.y = -Ghost.speed;
+                    break;
+                case 'down':
+                    ghost.velocity.x = 0;
+                    ghost.velocity.y = Ghost.speed;
+                    break;
+            }
+            ghost.prevCollisions = [] // Her seferinde sıfırlanmalı ki yeni yol bilgisini tutan dizi ('collisions') buna tekrar atansın.
+        }
+    })
 
     pacman.move(); // pacman nesnesinin hareketi için ilgili metot çağırısı
 }
