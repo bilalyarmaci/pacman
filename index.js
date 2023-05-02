@@ -85,8 +85,7 @@ const boundaries = [];
 const pellets = []
 
 
-// Sınırları temsil eden harita
-// '-' sembolü sınırı oluşturan blok parçacığını (kare) temsil ediyor.
+// Oyun haritasının temsili şablonu
 const map = [
     ['1', '-', '-', '-', '-', '-', '-', '-', '-', '-', '2'],
     ['|', '.', '.', '.', '.', '.', '.', '.', '.', '.', '|'],
@@ -103,7 +102,7 @@ const map = [
     ['4', '-', '-', '-', '-', '-', '-', '-', '-', '-', '3']
 ];
 
-// Her bir karakter için gerekli resmi oluşturmak için tanımlanan metot
+// Her bir karakter (sembol) için gerekli resmi oluşturmak için tanımlanan metot
 function getImage(img) {
     let image = new Image();
     image.src = img;
@@ -387,7 +386,7 @@ function animate() {
     *'lastKey' kontrolü aynı anda birden fazla tuşa basılması durumunda son basılan tuşun dikkate alınması için kullanılır. */
     if (keys.w.pressed && lastKey === 'w') {
         for (let i = 0; i < boundaries.length; i++) {
-            let boundary = boundaries[i]
+            const boundary = boundaries[i]
             if (isColliding({
                 circle: {
                     ...pacman,
@@ -407,7 +406,7 @@ function animate() {
         }
     } else if (keys.s.pressed && lastKey === 's') {
         for (let i = 0; i < boundaries.length; i++) {
-            let boundary = boundaries[i]
+            const boundary = boundaries[i]
             if (isColliding({
                 circle: {
                     ...pacman,
@@ -427,7 +426,7 @@ function animate() {
         }
     } else if (keys.a.pressed && lastKey === 'a') {
         for (let i = 0; i < boundaries.length; i++) {
-            let boundary = boundaries[i]
+            const boundary = boundaries[i]
             if (isColliding({
                 circle: {
                     ...pacman,
@@ -447,7 +446,7 @@ function animate() {
         }
     } else if (keys.d.pressed && lastKey === 'd') {
         for (let i = 0; i < boundaries.length; i++) {
-            let boundary = boundaries[i]
+            const boundary = boundaries[i]
             if (isColliding({
                 circle: {
                     ...pacman,
@@ -466,7 +465,7 @@ function animate() {
             }
         }
     }
-    /* II. İkinci kontrol duvar blokları teker teker çizdirilirken her blok için ayrı ayrı yapılır. Bu sayede her bir animasyon dögüsünde pacman herhangi bir şekilde sınır bloğuna çarpması engellenir.
+    /* II. İkinci kontrol duvar blokları teker teker çizdirilirken her blok için ayrı ayrı yapılır. Bu sayede her bir animasyon döngüsünde pacman herhangi bir şekilde sınır bloğuna çarpması engellenir.
     Bir sonraki adımda çarpacak olması durumunda "pacman"in hareketi durar. */
     boundaries.forEach((boundary) => {
         boundary.draw();
@@ -477,9 +476,17 @@ function animate() {
         };
     });
 
-    pellets.forEach((pellet) => {
+    /* Her animasyon tekrarında haplar pellets(haplar) dizisinin sonundan başlayarak çizdirilir. Bu yaklaşım yutulan hapın diziden silinmesinden sonra kalan hapları çizerken flaş(yanıp sönme) efekti vermemesi içindir.
+    */
+    for (let i = pellets.length - 1; i > 0; i--) {
+        let pellet = pellets[i];
         pellet.draw();
-    })
+        
+        // Pacman ile hapın çarpışıp çarpışmadığının kontrolü. Sonucunda çarpışan hap diziden silinir.
+        if (Math.hypot(pellet.position.x - pacman.position.x, pellet.position.y - pacman.position.y) < pellet.radius + pacman.radius) {
+            pellets.splice(i, 1);
+        }
+    }
 
     pacman.move(); // pacman nesnesinin hareketi için ilgili metot çağırısı
 }
