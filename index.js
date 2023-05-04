@@ -60,14 +60,15 @@ class Ghost {
         this.position = position;
         this.velocity = velocity;
         this.radius = 15;
-        this.color = color
+        this.color = color;
         this.prevCollisions = []
+        this.scared = false;
     }
     // Hayaleti ekrana çizdiren metot
     draw() {
         ctx.beginPath();
         ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = this.color;
+        ctx.fillStyle = this.scared ? 'blue' : this.color;
         ctx.fill();
         ctx.closePath();
     }
@@ -96,6 +97,23 @@ class Pellet {
     }
 }
 
+// Güç hapı sınıfı
+class PowerUp {
+    // Hap (pellet) sınıfındaki yapıcının benzeri
+    constructor({ position, velocity }) {
+        this.position = position;
+        this.radius = 8;
+    }
+    // Hapı ekrana çizdiren metot
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+        ctx.closePath();
+    }
+}
+
 // Pacman nesnesi oluşturuluyor
 const pacman = new Pacman({
     // "Pacman"in koordinatları sınırın (duvarın) içinde kalacak şekilde sınır koordinatlarının değerleri üzerinden verilir
@@ -111,6 +129,7 @@ const pacman = new Pacman({
 
 const boundaries = [];  // Sınırı oluşturan resimleri tutan dizi, yani sınırın ta kendisi
 const pellets = [];  // Oluşturulan hapları tutan dizi
+const powerUps = [];  // Oluşturulan güç haplarını (powerUp) tutan dizi
 // Oluşturulan hayaletleri tutan dizi
 const ghosts = [
     new Ghost({
@@ -126,7 +145,7 @@ const ghosts = [
     new Ghost({
         position: {
             x: Boundary.width * 6 + Boundary.width / 2,
-            y: Boundary.height * 3  + Boundary.height / 2
+            y: Boundary.height * 3 + Boundary.height / 2
         },
         velocity: {
             x: 0,
@@ -355,6 +374,16 @@ map.forEach((row, i) => {
                     })
                 );
                 break;
+            case 'p':
+                powerUps.push(
+                    new PowerUp({
+                        position: {
+                            x: j * Boundary.width + Boundary.width / 2,
+                            y: i * Boundary.height + Boundary.height / 2
+                        }
+                    })
+                );
+                break;
         }
     });
 });
@@ -534,7 +563,7 @@ function animate() {
 
     /* Her animasyon tekrarında haplar pellets(haplar) dizisinin sonundan başlayarak çizdirilir. Bu yaklaşım yutulan hapın diziden silinmesinden sonra kalan hapları çizerken flaş(yanıp sönme) efekti vermemesi içindir.
     */
-    for (let i = pellets.length - 1; i > 0; i--) {
+    for (let i = pellets.length - 1; i >= 0; i--) {
         let pellet = pellets[i];
         pellet.draw();
 
@@ -546,15 +575,45 @@ function animate() {
         }
     }
 
+    // Güç hapı animasyonu
+    for (let i = powerUps.length - 1; i >= 0; i--) {
+        let powerUp = powerUps[i];
+        powerUp.draw();
+
+        // Hap yendiğinde diziden çıkartılır ve ekrandan silinir. Aynı zamanda skor güncellemesi ve hayaletlerin korkma (ghost.scared) durumu doğru olur.
+        if (Math.hypot(powerUp.position.x - pacman.position.x, powerUp.position.y - pacman.position.y) < powerUp.radius + pacman.radius) {
+            powerUps.splice(i, 1);
+            score += 15
+            scoreElement.innerHTML = score;
+            // Korku halleri 5 saniye sürer.
+            ghosts.forEach((ghost) => {
+                ghost.scared = true;
+                setTimeout(() => {
+                    ghost.scared = false;
+                }, 5000)
+            })
+        }
+    }
+
+    // Pacman ile hayaletin çarpışıp çarpışmadığının kontrolü.
+    for (let i = ghosts.length - 1; i >= 0; i--) {
+        let ghost = ghosts[i];
+        if (Math.hypot(ghost.position.x - pacman.position.x, ghost.position.y - pacman.position.y) < ghost.radius + pacman.radius) {
+            // Hayalet korkmuşsa ve çarparsa diziden ve ekrandan silinerek skor güncellemesi yapılır.
+            if (ghost.scared) {
+                ghosts.splice(i,1);
+                score += 150;
+                scoreElement.innerHTML = score;
+            } else { //Hayalet korkmamışsa ve çarparsa oyun biter ve animasyon durdurulur.
+                cancelAnimationFrame(animationId);
+                console.log("You lose!")
+            }
+        }
+    }
+
     // Dizideki tüm hayaletler için
     ghosts.forEach((ghost) => {
         ghost.move();
-
-        // Pacman ile hayaletin çarpışıp çarpışmadığının kontrolü. Sonucunda oyun biter ve animasyon durdurulur.
-        if (Math.hypot(ghost.position.x - pacman.position.x, ghost.position.y - pacman.position.y) < ghost.radius + pacman.radius) {
-            cancelAnimationFrame(animationId);
-            console.log("You lose!")
-        }
 
         // Her blok parçası için ona bir sonraki harekette çarpmaya neden olacak yön bilgisini tutan dizi
         const collisions = []
