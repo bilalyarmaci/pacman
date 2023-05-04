@@ -8,19 +8,19 @@ let score = 0
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-// Oyuncuların ("Pacman"lerin) aşmayacakları sınırı oluşturmak için kullanılacak sınıf yapısı
+// Oyuncuların (pacman, hayaletler) aşmayacakları sınırı oluşturmak için kullanılan sınıf yapısı
 class Boundary {
-    // Nesne üretmeden ulaşılabilen genişlik ve yükseklik parametreleri
+    // Nesne üretmeden ulaşılabilen (static) genişlik ve yükseklik parametreleri
     static width = 40;
     static height = 40;
     // Canvas'a çizmek için gerekli olacak pozisyon (x, y) ve genişlil-yükseklik parametrelerini ayarlayan yapıcı (constructor)
-    constructor({ position, image }) {
+    constructor({ position, image }) {  // Yapıcı parametre olarak iki tane nesne almakta.
         this.position = position;
         this.width = Boundary.width;
         this.height = Boundary.height;
         this.image = image
     }
-    // Sınırı ekrana çizdiren metot
+    // Sınırı (resimleri) ekrana çizdiren metot
     draw() {
         ctx.drawImage(this.image, this.position.x, this.position.y);
     }
@@ -42,9 +42,9 @@ class Pacman {
     // Nesneyi ("pacman"i) ekrana çizdiren metot
     draw() {
         ctx.save();
-        ctx.translate(this.position.x,this.position.y);
+        ctx.translate(this.position.x, this.position.y);
         ctx.rotate(this.rotation);
-        ctx.translate(-this.position.x,-this.position.y);
+        ctx.translate(-this.position.x, -this.position.y);
         ctx.beginPath();
         ctx.arc(this.position.x, this.position.y, this.radius, this.radians, Math.PI * 2 - this.radians);
         ctx.lineTo(this.position.x, this.position.y);
@@ -58,16 +58,16 @@ class Pacman {
         this.draw();
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
-        
-        if(this.radians < 0 || this.radians > 0.65) this.mouthOpenRate = -this.mouthOpenRate;
 
-        this.radians += this.mouthOpenRate
+        // "Pacman"in ağzının büyüyüp küçülme sınırlarının kontrolü
+        if (this.radians < 0 || this.radians > 0.65) { this.mouthOpenRate = -this.mouthOpenRate };
+        this.radians += this.mouthOpenRate;
     }
 }
 
 // Hayalet (ghost) sınıfı
 class Ghost {
-    static speed = 1.5
+    static speed = 1.5  //  Hayaletin hız ayarı için kullanılıyor
     // Pacman sınıfındaki yapıcının benzeri
     constructor({ position, velocity, color = 'red' }) {
         this.position = position;
@@ -81,11 +81,12 @@ class Ghost {
     draw() {
         ctx.beginPath();
         ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+        // Hayaletin korkma durumu kontrol ediliyor. move() metodu her animasyon karesi için bu metodu (draw()) çağırdığından ötürü her defasında kontrol yapılmakta.
         ctx.fillStyle = this.scared ? 'blue' : this.color;
         ctx.fill();
         ctx.closePath();
     }
-    // Hareket efekti için pozisyon (x ve y koordinatları) güncellemesi yaparak 'draw' metodunu çağırır
+    // Hareket efekti için pozisyon (x ve y koordinatları) güncellemesi yaparak 'draw()' metodunu çağırır
     move() {
         this.draw();
         this.position.x += this.velocity.x;
@@ -141,10 +142,9 @@ const pacman = new Pacman({
 });
 
 const boundaries = [];  // Sınırı oluşturan resimleri tutan dizi, yani sınırın ta kendisi
-const pellets = [];  // Oluşturulan hapları tutan dizi
-const powerUps = [];  // Oluşturulan güç haplarını (powerUp) tutan dizi
-// Oluşturulan hayaletleri tutan dizi
-const ghosts = [
+const pellets = [];     // Oluşturulan hapları tutan dizi
+const powerUps = [];    // Oluşturulan güç haplarını (powerUp) tutan dizi
+const ghosts = [        // Oluşturulan hayaletler
     new Ghost({
         position: {
             x: Boundary.width * 7 + Boundary.width / 2,
@@ -197,10 +197,11 @@ function getImage(img) {
 map.forEach((row, i) => {
     row.forEach((symbol, j) => { // Satırdaki her elemanı karşılaştırmak için satır içi tarama
         // symbol = o anki indisteki (sütundaki) eleman, j = mevcut indis (sütun) numarası
+        // Sembole göre resim eklemesi yapılır. Halihazırdaki satır ve sütun değerleri dikkate alınarak pozisyon ataması yapılır.
         switch (symbol) {
             case '-':
                 boundaries.push(
-                    new Boundary({  // '-' bulunması durumunda sınırı oluşturan diziye blok eklemesi yapılır. Halihazırdaki satır ve sütun değerleri dikkate alınarak pozisyon ataması yapılır.
+                    new Boundary({
                         position: {
                             x: Boundary.width * j,
                             y: Boundary.height * i
@@ -421,7 +422,8 @@ let lastKey = ''
 
 // Tuşun basılmaya başlandığı anı dinler
 addEventListener('keydown', ({ key }) => {
-    switch (key) {  // Her tuş için durum güncellemesi yapılır. Hareket için 'animation' metodunda bu değerler kullanılıyor.
+    // Her tuş için durum güncellemesi yapılır. Hareket için 'animation()' metodunda bu değerler kullanılıyor.
+    switch (key) {
         case 'w':
             keys.w.pressed = true;
             lastKey = 'w';
@@ -484,8 +486,8 @@ function animate() {
     I. İlk kontrol sonucunda en son hangi tuş basılıyorsa (aynı anda birden fazla tuşa basıldığında son basılan tuş etki edecektir) o tuşun gerektirdiği hareket "pacman"e verilir,
     ANCAK:
     - Her bir tuş basımında gitmek istenilen yönde sınır (duvar bloğu) var mı diye kontrol edilir.
-    - Bir tane dahi olması durumunda o yönde herhangi bir hız (velocity) verilmez (veya sıfır atanır) ve döngü kırılılarak (break) sonlandırılır.
-    - Sonuçta engelin olduğu yöne gitme denemesi engellenir (II. kontrolün "pacman"i tamamen durdurması engellenir) ve pacman duvar bloğu çıkana kadar HALİHAZIRDA gitmek olduğu yönde hareketine devam eder. 
+    - Olması durumunda o yönde herhangi bir hız (velocity) verilmez (veya sıfır atanır) ve döngü kırılılarak (break) sonlandırılır. Döngüde tüm duvar blokları için kontrol yapıldığı için break ile döngü kırılmazsa "pacman"e o yönde bir hız uygulanacak ve II. kontrol "pacman"i tamamen durduracak. Bu yüzden break ifadesi gereklidir.
+    - Sonuçta engelin olduğu yöne gitme denemesi engellenir (bu sayede de II. kontrolün "pacman"i tamamen durdurması engellenir) ve pacman engel çıkana kadar HALİHAZIRDA gitmek olduğu yönde hareketine devam eder. 
 
     *'lastKey' kontrolü aynı anda birden fazla tuşa basılması durumunda son basılan tuşun dikkate alınması için kullanılır. */
     if (keys.w.pressed && lastKey === 'w') {
@@ -569,7 +571,7 @@ function animate() {
             }
         }
     }
-    /* II. İkinci kontrol duvar blokları teker teker çizdirilirken her blok için ayrı ayrı yapılır. Bu sayede her bir animasyon döngüsünde pacman herhangi bir şekilde sınır bloğuna çarpması engellenir.
+    /* II. İkinci kontrol duvar resmi teker teker çizdirilirken her resim için ayrı ayrı yapılır. Bu sayede her bir animasyon döngüsünde "pacman"in herhangi bir şekilde sınırlara çarpması engellenir.
     Bir sonraki adımda çarpacak olması durumunda "pacman"in hareketi durar. */
     boundaries.forEach((boundary) => {
         boundary.draw();
@@ -599,12 +601,12 @@ function animate() {
         let powerUp = powerUps[i];
         powerUp.draw();
 
-        // Hap yendiğinde diziden çıkartılır ve ekrandan silinir. Aynı zamanda skor güncellemesi ve hayaletlerin korkma (ghost.scared) durumu doğru olur.
+        // Hap yendiğinde diziden çıkartılır ve ekrandan silinir. Aynı zamanda skor güncellemesi ve hayaletlerin korkma (ghost.scared) durumu doğru (true) olur.
         if (Math.hypot(powerUp.position.x - pacman.position.x, powerUp.position.y - pacman.position.y) < powerUp.radius + pacman.radius) {
             powerUps.splice(i, 1);
             score += 15
             scoreElement.innerHTML = score;
-            // Korku halleri 5 saniye sürer.
+            // Korku hali 5 saniye sürer.
             ghosts.forEach((ghost) => {
                 ghost.scared = true;
                 setTimeout(() => {
@@ -623,18 +625,17 @@ function animate() {
                 ghosts.splice(i, 1);
                 score += 150;
                 scoreElement.innerHTML = score;
-            } else { //Hayalet korkmamışsa ve çarparsa oyun biter ve animasyon durdurulur.
+            } else {    //Hayalet korkmamışsa ve çarparsa oyun biter ve animasyon durdurulur.
                 cancelAnimationFrame(animationId);
                 console.log("You lose!")
             }
         }
     }
 
-    // Dizideki tüm hayaletler için
     ghosts.forEach((ghost) => {
         ghost.move();
 
-        // Her blok parçası için ona bir sonraki harekette çarpmaya neden olacak yön bilgisini tutan dizi
+        // Her sınır parçası için ona bir sonraki harekette çarpmaya neden olacak yön bilgisini tutan dizi
         const collisions = []
         /* Mevcut hayalet için her blok parçası kontrol ediliyor.
         Eğer dizide çarpılacak yön bilgisi zaten mevcut değilse ve bir sonraki adımda o yönde bir çarpma olacaksa yön bilgisi diziye ekleniyor. */
@@ -704,23 +705,23 @@ function animate() {
                 ghost.prevCollisions.push('down');
             }
 
-            console.log(collisions)
-            console.log(ghost.prevCollisions)
+            console.log(collisions);
+            console.log(ghost.prevCollisions);
 
             // Gidilebilecek açık yönler; mevcut durumda olup, bir sonraki durumda olmayan yönler
             const pathways = ghost.prevCollisions.filter(collision => {
                 return !collisions.includes(collision);
-            })
+            });
 
             console.log({ pathways });
 
             // Gidilecek yönün rastgele seçimi
             // Buraya halihazırda gidilen yön de dahildir.
-            const direction = pathways[Math.floor(Math.random() * pathways.length)]
+            const direction = pathways[Math.floor(Math.random() * pathways.length)];
 
             console.log({ direction });
 
-            // Yön seçimine göre yön değişimini yapan switch-case yapısı
+            // Yön seçimine göre yön güncellemesi yapan switch-case yapısı
             switch (direction) {
                 case 'right':
                     ghost.velocity.x = Ghost.speed;
@@ -739,17 +740,17 @@ function animate() {
                     ghost.velocity.y = Ghost.speed;
                     break;
             }
-            ghost.prevCollisions = [] // Her seferinde sıfırlanmalı ki yeni yol bilgisini tutan dizi ('collisions') buna tekrar atansın.
+            ghost.prevCollisions = []; // Her seferinde sıfırlanmalı ki yeni yol bilgisini tutan dizi ('collisions') buna tekrar atansın.
         }
     })
 
     pacman.move(); // pacman nesnesinin hareketi için ilgili metot çağırısı
 
     // Gittiği yöne göre "pacman"i döndüren koşullu ifade
-    if(pacman.velocity.x > 0 ) pacman.rotation = 0;
-    else if(pacman.velocity.x < 0 ) pacman.rotation = Math.PI;
-    else if(pacman.velocity.y > 0 ) pacman.rotation = Math.PI / 2;
-    else if(pacman.velocity.y < 0 ) pacman.rotation = Math.PI / (2/3);
+    if (pacman.velocity.x > 0) pacman.rotation = 0;
+    else if (pacman.velocity.x < 0) pacman.rotation = Math.PI;
+    else if (pacman.velocity.y > 0) pacman.rotation = Math.PI / 2;
+    else if (pacman.velocity.y < 0) pacman.rotation = Math.PI / (2 / 3);
 }
 
-animate();
+animate();  // Animasyon çağrısı
