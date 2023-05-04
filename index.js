@@ -35,20 +35,33 @@ class Pacman {
         this.position = position;
         this.velocity = velocity;
         this.radius = 15;
+        this.radians = 0.65;
+        this.mouthOpenRate = 0.09;
+        this.rotation = 0
     }
     // Nesneyi ("pacman"i) ekrana çizdiren metot
     draw() {
+        ctx.save();
+        ctx.translate(this.position.x,this.position.y);
+        ctx.rotate(this.rotation);
+        ctx.translate(-this.position.x,-this.position.y);
         ctx.beginPath();
-        ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+        ctx.arc(this.position.x, this.position.y, this.radius, this.radians, Math.PI * 2 - this.radians);
+        ctx.lineTo(this.position.x, this.position.y);
         ctx.fillStyle = 'yellow';
         ctx.fill();
         ctx.closePath();
+        ctx.restore();
     }
     // Hareket efekti için pozisyon (x ve y koordinatları) güncellemesi yaparak 'draw' metodunu çağıran metot
     move() {
         this.draw();
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
+        
+        if(this.radians < 0 || this.radians > 0.65) this.mouthOpenRate = -this.mouthOpenRate;
+
+        this.radians += this.mouthOpenRate
     }
 }
 
@@ -158,7 +171,7 @@ const ghosts = [
 // Oyun haritasının temsili şablonu
 const map = [
     ['1', '-', '-', '-', '-', '-', '-', '-', '-', '-', '2'],
-    ['|', '.', '.', '.', '.', '.', '.', '.', '.', '.', '|'],
+    ['|', ' ', '.', '.', '.', '.', '.', '.', '.', '.', '|'],
     ['|', '.', 'b', '.', '[', '7', ']', '.', 'b', '.', '|'],
     ['|', '.', '.', '.', '.', '_', '.', '.', '.', '.', '|'],
     ['|', '.', '[', ']', '.', '.', '.', '[', ']', '.', '|'],
@@ -460,6 +473,7 @@ function animate() {
     animationId = requestAnimationFrame(animate); // Animasyon için halihazırda var olan fonksiyon
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Bir önceki çizimlerin silinmesini sağlayan fonksiyon
 
+    // Kazanma durumu
     if (pellets.length === 0 && powerUps.length === 0) {
         console.log('You win!');
         cancelAnimationFrame(animationId);
@@ -730,6 +744,12 @@ function animate() {
     })
 
     pacman.move(); // pacman nesnesinin hareketi için ilgili metot çağırısı
+
+    // Gittiği yöne göre "pacman"i döndüren koşullu ifade
+    if(pacman.velocity.x > 0 ) pacman.rotation = 0;
+    else if(pacman.velocity.x < 0 ) pacman.rotation = Math.PI;
+    else if(pacman.velocity.y > 0 ) pacman.rotation = Math.PI / 2;
+    else if(pacman.velocity.y < 0 ) pacman.rotation = Math.PI / (2/3);
 }
 
 animate();
