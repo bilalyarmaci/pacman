@@ -115,13 +115,24 @@ const pellets = [];  // Oluşturulan hapları tutan dizi
 const ghosts = [
     new Ghost({
         position: {
-            x: Boundary.width * 6 + Boundary.width / 2,
+            x: Boundary.width * 7 + Boundary.width / 2,
             y: Boundary.height + Boundary.height / 2
         },
         velocity: {
             x: Ghost.speed,
             y: 0
         }
+    }),
+    new Ghost({
+        position: {
+            x: Boundary.width * 6 + Boundary.width / 2,
+            y: Boundary.height * 3  + Boundary.height / 2
+        },
+        velocity: {
+            x: 0,
+            y: Ghost.speed
+        },
+        color: 'pink'
     })
 ];
 
@@ -412,9 +423,12 @@ function isColliding({ circle, rectangle }) {
     return (circle.position.x - circle.radius + circle.velocity.x <= rectangle.position.x + rectangle.width + padding && circle.position.x + circle.radius + circle.velocity.x >= rectangle.position.x - padding && circle.position.y - circle.radius + circle.velocity.y <= rectangle.position.y + rectangle.height + padding && circle.position.y + circle.radius + circle.velocity.y >= rectangle.position.y - padding)
 }
 
+// Animasyon ID'sini tutan değişken. Oyun bittiğinde animasyonu durdumak için kullanılmakta.
+let animationId;
+
 // Canvas içerisindeki tüm çizimlerin tekrarlı bir biçimde çağırılmasıyla animasyon görünümü oluşturmakla sorumlu metot
 function animate() {
-    requestAnimationFrame(animate); // Animasyon için halihazırda var olan fonksiyon
+    animationId = requestAnimationFrame(animate); // Animasyon için halihazırda var olan fonksiyon
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Bir önceki çizimlerin silinmesini sağlayan fonksiyon
 
     /* Her animasyon tekrarında (animate metodunun tekrarında) iki kontrol yapılmakta:
@@ -535,6 +549,13 @@ function animate() {
     // Dizideki tüm hayaletler için
     ghosts.forEach((ghost) => {
         ghost.move();
+
+        // Pacman ile hayaletin çarpışıp çarpışmadığının kontrolü. Sonucunda oyun biter ve animasyon durdurulur.
+        if (Math.hypot(ghost.position.x - pacman.position.x, ghost.position.y - pacman.position.y) < ghost.radius + pacman.radius) {
+            cancelAnimationFrame(animationId);
+            console.log("You lose!")
+        }
+
         // Her blok parçası için ona bir sonraki harekette çarpmaya neden olacak yön bilgisini tutan dizi
         const collisions = []
         /* Mevcut hayalet için her blok parçası kontrol ediliyor.
