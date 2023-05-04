@@ -30,7 +30,7 @@ class Boundary {
 class Pacman {
     // Boundary sınıfındaki yapıcının benzeri
     // Daire oluşturulduğundan yarıçap (radius) değeri de gereklidir
-    static speed = 2.5      // "Pacman"in hız ayarı için kullanılıyor
+    static speed = 5    // "Pacman"in hız ayarı için kullanılıyor
     constructor({ position, velocity }) {
         this.position = position;
         this.velocity = velocity;
@@ -460,6 +460,11 @@ function animate() {
     animationId = requestAnimationFrame(animate); // Animasyon için halihazırda var olan fonksiyon
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Bir önceki çizimlerin silinmesini sağlayan fonksiyon
 
+    if (pellets.length === 0 && powerUps.length === 0) {
+        console.log('You win!');
+        cancelAnimationFrame(animationId);
+    }
+
     /* Her animasyon tekrarında (animate metodunun tekrarında) iki kontrol yapılmakta:
     
     I. İlk kontrol sonucunda en son hangi tuş basılıyorsa (aynı anda birden fazla tuşa basıldığında son basılan tuş etki edecektir) o tuşun gerektirdiği hareket "pacman"e verilir,
@@ -601,7 +606,7 @@ function animate() {
         if (Math.hypot(ghost.position.x - pacman.position.x, ghost.position.y - pacman.position.y) < ghost.radius + pacman.radius) {
             // Hayalet korkmuşsa ve çarparsa diziden ve ekrandan silinerek skor güncellemesi yapılır.
             if (ghost.scared) {
-                ghosts.splice(i,1);
+                ghosts.splice(i, 1);
                 score += 150;
                 scoreElement.innerHTML = score;
             } else { //Hayalet korkmamışsa ve çarparsa oyun biter ve animasyon durdurulur.
