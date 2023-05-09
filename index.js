@@ -3,7 +3,10 @@ const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 const scoreElement = document.querySelector('#score');
 const gameMenuModal = document.querySelector('.menu-modal');
+const gameOverModal = document.querySelector('.game-over-modal');
+const winModal = document.querySelector('.win-modal');
 const htpModal = document.querySelector('.how-to-play-modal');
+const gameCanvasElement = document.querySelector('.game-canvas');
 let score = 0;
 
 // Oyun haritasının temsili şablonu
@@ -149,46 +152,14 @@ class PowerUp {
     }
 }
 
-// Pacman nesnesi oluşturuluyor
-const pacman = new Pacman({
-    // "Pacman"in koordinatları sınırın (duvarın) içinde kalacak şekilde sınır koordinatlarının değerleri üzerinden verilir
-    position: {
-        x: Boundary.width + Boundary.width / 2,
-        y: Boundary.height + Boundary.height / 2
-    },
-    velocity: { // Başlangıç hızı yok - hareket yok
-        x: 0,
-        y: 0
-    }
-});
 
-const boundaries = [];  // Sınırı oluşturan resimleri tutan dizi, yani sınırın ta kendisi
-const pellets = [];     // Oluşturulan hapları tutan dizi
-const powerUps = [];    // Oluşturulan güç haplarını (powerUp) tutan dizi
-const ghosts = [        // Oluşturulan hayaletler
-    new Ghost({
-        position: {
-            x: Boundary.width * 7 + Boundary.width / 2,
-            y: Boundary.height + Boundary.height / 2
-        },
-        velocity: {
-            x: Ghost.speed,
-            y: 0
-        }
-    }),
-    new Ghost({
-        position: {
-            x: Boundary.width * 6 + Boundary.width / 2,
-            y: Boundary.height * 3 + Boundary.height / 2
-        },
-        velocity: {
-            x: 0,
-            y: Ghost.speed
-        },
-        color: 'pink'
-    })
-];
+let pacman = undefined; // Pacman
+let boundaries = [];    // Sınırı oluşturan resimleri tutan dizi, yani sınırın ta kendisi
+let pellets = [];       // Oluşturulan hapları tutan dizi
+let powerUps = [];      // Oluşturulan güç haplarını (powerUp) tutan dizi
+let ghosts = [];        // Oluşturulan hayaletleri tutan dizi
 
+init(); // Nesneleri oluşturan (initialise) fonskiyon
 
 // Her bir karakter (sembol) için gerekli resmi oluşturmak için tanımlanan metot
 function getImage(img) {
@@ -196,216 +167,6 @@ function getImage(img) {
     image.src = img;
     return image;
 }
-
-// Oluşturulan harita şablonu kullanılarak haritanın oluşturulması için dizilerin doldurulması
-// row = satır, i = mevcut satır numarası
-map.forEach((row, i) => {
-    row.forEach((symbol, j) => { // Satırdaki her elemanı karşılaştırmak için satır içi tarama
-        // symbol = o anki indisteki (sütundaki) eleman, j = mevcut indis (sütun) numarası
-        // Sembole göre resim eklemesi yapılır. Halihazırdaki satır ve sütun değerleri dikkate alınarak pozisyon ataması yapılır.
-        switch (symbol) {
-            case '-':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: Boundary.width * j,
-                            y: Boundary.height * i
-                        },
-                        image: getImage('img/pipeHorizontal.png')
-                    })
-                );
-                break;
-            case '|':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: Boundary.width * j,
-                            y: Boundary.height * i
-                        },
-                        image: getImage('./img/pipeVertical.png')
-                    })
-                );
-                break;
-            case '1':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: Boundary.width * j,
-                            y: Boundary.height * i
-                        },
-                        image: getImage('./img/pipeCorner1.png')
-                    })
-                );
-                break;
-            case '2':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: Boundary.width * j,
-                            y: Boundary.height * i
-                        },
-                        image: getImage('./img/pipeCorner2.png')
-                    })
-                );
-                break;
-            case '3':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: Boundary.width * j,
-                            y: Boundary.height * i
-                        },
-                        image: getImage('./img/pipeCorner3.png')
-                    })
-                );
-                break;
-            case '4':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: Boundary.width * j,
-                            y: Boundary.height * i
-                        },
-                        image: getImage('./img/pipeCorner4.png')
-                    })
-                );
-                break;
-            case 'b':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: Boundary.width * j,
-                            y: Boundary.height * i
-                        },
-                        image: getImage('./img/block.png')
-                    })
-                );
-                break;
-            case '[':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: j * Boundary.width,
-                            y: i * Boundary.height
-                        },
-                        image: getImage('./img/capLeft.png')
-                    })
-                );
-                break;
-            case ']':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: j * Boundary.width,
-                            y: i * Boundary.height
-                        },
-                        image: getImage('./img/capRight.png')
-                    })
-                );
-                break;
-            case '_':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: j * Boundary.width,
-                            y: i * Boundary.height
-                        },
-                        image: getImage('./img/capBottom.png')
-                    })
-                );
-                break;
-            case '^':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: j * Boundary.width,
-                            y: i * Boundary.height
-                        },
-                        image: getImage('./img/capTop.png')
-                    })
-                );
-                break;
-            case '+':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: j * Boundary.width,
-                            y: i * Boundary.height
-                        },
-                        image: getImage('./img/pipeCross.png')
-                    })
-                );
-                break;
-            case '5':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: j * Boundary.width,
-                            y: i * Boundary.height
-                        },
-                        color: 'blue',
-                        image: getImage('./img/pipeConnectorTop.png')
-                    })
-                );
-                break;
-            case '6':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: j * Boundary.width,
-                            y: i * Boundary.height
-                        },
-                        color: 'blue',
-                        image: getImage('./img/pipeConnectorRight.png')
-                    })
-                );
-                break;
-            case '7':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: j * Boundary.width,
-                            y: i * Boundary.height
-                        },
-                        color: 'blue',
-                        image: getImage('./img/pipeConnectorBottom.png')
-                    })
-                );
-                break;
-            case '8':
-                boundaries.push(
-                    new Boundary({
-                        position: {
-                            x: j * Boundary.width,
-                            y: i * Boundary.height
-                        },
-                        image: getImage('./img/pipeConnectorLeft.png')
-                    })
-                );
-                break;
-            case '.':
-                pellets.push(
-                    new Pellet({
-                        position: {
-                            x: j * Boundary.width + Boundary.width / 2,
-                            y: i * Boundary.height + Boundary.height / 2
-                        }
-                    })
-                );
-                break;
-            case 'p':
-                powerUps.push(
-                    new PowerUp({
-                        position: {
-                            x: j * Boundary.width + Boundary.width / 2,
-                            y: i * Boundary.height + Boundary.height / 2
-                        }
-                    })
-                );
-                break;
-        }
-    });
-});
 
 // Basılan klavye tuşlarını tutan dizi
 const keys = {
@@ -472,6 +233,258 @@ function isColliding({ circle, rectangle }) {
     return (circle.position.x - circle.radius + circle.velocity.x <= rectangle.position.x + rectangle.width + padding && circle.position.x + circle.radius + circle.velocity.x >= rectangle.position.x - padding && circle.position.y - circle.radius + circle.velocity.y <= rectangle.position.y + rectangle.height + padding && circle.position.y + circle.radius + circle.velocity.y >= rectangle.position.y - padding)
 }
 
+function init() {
+    score = 0
+    scoreElement.innerHTML = score;
+    pacman = new Pacman({
+        // "Pacman"in koordinatları sınırın (duvarın) içinde kalacak şekilde sınır koordinatlarının değerleri üzerinden verilir
+        position: {
+            x: Boundary.width + Boundary.width / 2,
+            y: Boundary.height + Boundary.height / 2
+        },
+        velocity: { // Başlangıç hızı yok - hareket yok
+            x: 0,
+            y: 0
+        }
+    });
+
+    pellets = [];     // Oluşturulan hapları tutan dizi
+    powerUps = [];    // Oluşturulan güç haplarını (powerUp) tutan dizi
+    ghosts = [        // Oluşturulan hayaletler
+        new Ghost({
+            position: {
+                x: Boundary.width * 7 + Boundary.width / 2,
+                y: Boundary.height + Boundary.height / 2
+            },
+            velocity: {
+                x: Ghost.speed,
+                y: 0
+            }
+        }),
+        new Ghost({
+            position: {
+                x: Boundary.width * 6 + Boundary.width / 2,
+                y: Boundary.height * 3 + Boundary.height / 2
+            },
+            velocity: {
+                x: 0,
+                y: Ghost.speed
+            },
+            color: 'pink'
+        })
+    ];
+
+    // Oluşturulan harita şablonu kullanılarak haritanın oluşturulması için dizilerin doldurulması
+    // row = satır, i = mevcut satır numarası
+    map.forEach((row, i) => {
+        row.forEach((symbol, j) => { // Satırdaki her elemanı karşılaştırmak için satır içi tarama
+            // symbol = o anki indisteki (sütundaki) eleman, j = mevcut indis (sütun) numarası
+            // Sembole göre resim eklemesi yapılır. Halihazırdaki satır ve sütun değerleri dikkate alınarak pozisyon ataması yapılır.
+            switch (symbol) {
+                case '-':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: Boundary.width * j,
+                                y: Boundary.height * i
+                            },
+                            image: getImage('img/pipeHorizontal.png')
+                        })
+                    );
+                    break;
+                case '|':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: Boundary.width * j,
+                                y: Boundary.height * i
+                            },
+                            image: getImage('./img/pipeVertical.png')
+                        })
+                    );
+                    break;
+                case '1':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: Boundary.width * j,
+                                y: Boundary.height * i
+                            },
+                            image: getImage('./img/pipeCorner1.png')
+                        })
+                    );
+                    break;
+                case '2':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: Boundary.width * j,
+                                y: Boundary.height * i
+                            },
+                            image: getImage('./img/pipeCorner2.png')
+                        })
+                    );
+                    break;
+                case '3':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: Boundary.width * j,
+                                y: Boundary.height * i
+                            },
+                            image: getImage('./img/pipeCorner3.png')
+                        })
+                    );
+                    break;
+                case '4':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: Boundary.width * j,
+                                y: Boundary.height * i
+                            },
+                            image: getImage('./img/pipeCorner4.png')
+                        })
+                    );
+                    break;
+                case 'b':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: Boundary.width * j,
+                                y: Boundary.height * i
+                            },
+                            image: getImage('./img/block.png')
+                        })
+                    );
+                    break;
+                case '[':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: j * Boundary.width,
+                                y: i * Boundary.height
+                            },
+                            image: getImage('./img/capLeft.png')
+                        })
+                    );
+                    break;
+                case ']':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: j * Boundary.width,
+                                y: i * Boundary.height
+                            },
+                            image: getImage('./img/capRight.png')
+                        })
+                    );
+                    break;
+                case '_':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: j * Boundary.width,
+                                y: i * Boundary.height
+                            },
+                            image: getImage('./img/capBottom.png')
+                        })
+                    );
+                    break;
+                case '^':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: j * Boundary.width,
+                                y: i * Boundary.height
+                            },
+                            image: getImage('./img/capTop.png')
+                        })
+                    );
+                    break;
+                case '+':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: j * Boundary.width,
+                                y: i * Boundary.height
+                            },
+                            image: getImage('./img/pipeCross.png')
+                        })
+                    );
+                    break;
+                case '5':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: j * Boundary.width,
+                                y: i * Boundary.height
+                            },
+                            color: 'blue',
+                            image: getImage('./img/pipeConnectorTop.png')
+                        })
+                    );
+                    break;
+                case '6':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: j * Boundary.width,
+                                y: i * Boundary.height
+                            },
+                            color: 'blue',
+                            image: getImage('./img/pipeConnectorRight.png')
+                        })
+                    );
+                    break;
+                case '7':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: j * Boundary.width,
+                                y: i * Boundary.height
+                            },
+                            color: 'blue',
+                            image: getImage('./img/pipeConnectorBottom.png')
+                        })
+                    );
+                    break;
+                case '8':
+                    boundaries.push(
+                        new Boundary({
+                            position: {
+                                x: j * Boundary.width,
+                                y: i * Boundary.height
+                            },
+                            image: getImage('./img/pipeConnectorLeft.png')
+                        })
+                    );
+                    break;
+                case '.':
+                    pellets.push(
+                        new Pellet({
+                            position: {
+                                x: j * Boundary.width + Boundary.width / 2,
+                                y: i * Boundary.height + Boundary.height / 2
+                            }
+                        })
+                    );
+                    break;
+                case 'p':
+                    powerUps.push(
+                        new PowerUp({
+                            position: {
+                                x: j * Boundary.width + Boundary.width / 2,
+                                y: i * Boundary.height + Boundary.height / 2
+                            }
+                        })
+                    );
+                    break;
+            }
+        });
+    });
+}
+
 // Animasyon ID'sini tutan değişken. Oyun bittiğinde animasyonu durdumak için kullanılmakta.
 let animationId;
 
@@ -482,8 +495,11 @@ function animate() {
 
     // Kazanma durumu
     if (pellets.length === 0 && powerUps.length === 0) {
-        console.log('You win!');
         cancelAnimationFrame(animationId);
+        winModal.style.display = 'flex';
+        setTimeout(() => {
+            winModal.style.height = '100vh';
+        }, 0);
     }
 
     /* Her animasyon tekrarında (animate metodunun tekrarında) iki kontrol yapılmakta:
@@ -632,7 +648,10 @@ function animate() {
                 scoreElement.innerHTML = score;
             } else {    //Hayalet korkmamışsa ve çarparsa oyun biter ve animasyon durdurulur.
                 cancelAnimationFrame(animationId);
-                console.log("You lose!")
+                gameOverModal.style.display = 'flex';
+                setTimeout(() => {
+                    gameOverModal.style.height = '100vh';
+                }, 0);
             }
         }
     }
@@ -754,8 +773,13 @@ function animate() {
 // Menü işlem ve efektleri için tanımlanan metotlar
 function startGame() {
     setTimeout(() => {
+        init();     // Değerler yeniden atanır
+    }, 300);
+
+    setTimeout(() => {
+        gameCanvasElement.style.display = 'flex';
         animate();  // Animasyon çağrısı        
-    }, 500);
+    }, 450);
 }
 
 function showMenuModal() {
@@ -787,4 +811,18 @@ function hideHTPModal() {
         htpModal.style.display = 'none';
     }, 300);
 
+}
+
+function hideGameOverModal() {
+    gameOverModal.style.height = '250vh';
+    setTimeout(() => {
+        gameOverModal.style.display = 'none';
+    }, 300);
+}
+
+function hideWinModal() {
+    winModal.style.height = '250vh';
+    setTimeout(() => {
+        winModal.style.display = 'none';
+    }, 300);
 }
