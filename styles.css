@@ -12,12 +12,18 @@ body {
     text-align: center;
 }
 
+h2{
+    font-family: 'Roboto', sans-serif;
+    font-size: clamp(1rem, 5vw, 3rem);
+    margin: 0;
+}
+
 ul {
     padding: 0;
 }
 
 .game-canvas{
-    display: flex;
+    display: none;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -81,4 +87,30 @@ button {
 button:hover {
     border: 5px #54E346 solid;
     cursor: pointer;
+}
+
+.game-over-modal, .win-modal{
+    display: none;
+    height: 250vh;
+    transition: all .5s ease-in-out;
+}
+
+.game-over-bg, .win-bg{
+    background-color: rgba(255, 255, 255, 0.85);
+    width: clamp(300px, 50vw, 500px);
+    padding: 1rem;
+}
+
+.game-over-bg{
+    background-color: #FC2947;
+    color: #FFDEB9;
+}
+
+.game-over-modal button{
+    background-color: #FFDEB9;
+    color: #FC2947;
+}
+
+.game-over-modal button:hover{
+    border-color: black;
 }
