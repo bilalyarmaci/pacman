@@ -1,8 +1,10 @@
 // Gerekli tanımlamalar
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
-let scoreElement = document.querySelector('#score');
-let score = 0
+const scoreElement = document.querySelector('#score');
+const gameMenuModal = document.querySelector('.menu-modal');
+const htpModal = document.querySelector('.how-to-play-modal');
+let score = 0;
 
 // Oyun haritasının temsili şablonu
 const map = [
@@ -708,21 +710,14 @@ function animate() {
                 ghost.prevCollisions.push('down');
             }
 
-            console.log(collisions);
-            console.log(ghost.prevCollisions);
-
             // Gidilebilecek açık yönler; mevcut durumda olup, bir sonraki durumda olmayan yönler
             const pathways = ghost.prevCollisions.filter(collision => {
                 return !collisions.includes(collision);
             });
 
-            console.log({ pathways });
-
             // Gidilecek yönün rastgele seçimi
             // Buraya halihazırda gidilen yön de dahildir.
             const direction = pathways[Math.floor(Math.random() * pathways.length)];
-
-            console.log({ direction });
 
             // Yön seçimine göre yön güncellemesi yapan switch-case yapısı
             switch (direction) {
@@ -756,4 +751,40 @@ function animate() {
     else if (pacman.velocity.y < 0) pacman.rotation = Math.PI / (2 / 3);
 }
 
-animate();  // Animasyon çağrısı
+// Menü işlem ve efektleri için tanımlanan metotlar
+function startGame() {
+    setTimeout(() => {
+        animate();  // Animasyon çağrısı        
+    }, 500);
+}
+
+function showMenuModal() {
+    setTimeout(() => {
+        gameMenuModal.style.height = '100vh';
+    }, 350);
+    gameMenuModal.style.display = 'flex';
+}
+
+function hideMenuModal() {
+    gameMenuModal.style.height = '250vh';
+    setTimeout(() => {
+        gameMenuModal.style.display = 'none';
+    }, 500);
+}
+
+function showHTPModal() {
+    setTimeout(() => {
+        htpModal.style.height = '100vh';
+    }, 450);
+    setTimeout(() => {
+        htpModal.style.display = 'flex';
+    }, 300);
+}
+
+function hideHTPModal() {
+    htpModal.style.height = '250vh';
+    setTimeout(() => {
+        htpModal.style.display = 'none';
+    }, 300);
+
+}
