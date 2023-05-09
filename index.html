@@ -19,7 +19,7 @@
                 <button onclick="hideMenuModal(), showHTPModal()" id="howToPlayBtn">Nasıl oynanır?</button>
             </div>
             <div>
-                <a href="#"><button id="aboutBtn">Detay</button></a>
+                <a href="#"><button id="aboutBtn"><\></button></a>
             </div>
         </div>
     </div>
@@ -36,10 +36,26 @@
             <button id="backBtn" onclick="hideHTPModal(), showMenuModal()">Menü</button>
         </div>
     </div>
-    
+
+    <!-- Grafik arayüz için kullanılan modal; 'oyun kaybedildi' modali -->
+    <div class="menu-modal game-over-modal">
+        <div class="game-over-bg">
+            <h2>Oyunu kaybettin!</h2>
+            <button onclick="startGame(),hideGameOverModal()">Tekrar oyna</button>
+        </div>
+    </div>
+
+    <!-- Grafik arayüz için kullanılan modal; 'oyun kazanıldı' modali -->
+    <div class="menu-modal win-modal">
+        <div class="win-bg">
+            <h2>Tebrikler! <br> Oyunu kazandın!</h2>
+            <button onclick="startGame(),hideWinModal()">Tekrar oyna</button>
+        </div>
+    </div>
+
 
     <div class="game-canvas">
-        <p><span>Score: </span><span id="score">0</span></p>
+        <p><span>Skor: </span><span id="score">0</span></p>
         <canvas></canvas>
     </div>
 
