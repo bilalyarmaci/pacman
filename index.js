@@ -1,12 +1,31 @@
-// Gerekli tanılamalar
+// Gerekli tanımlamalar
 const canvas = document.querySelector('canvas');
 const ctx = canvas.getContext('2d');
 let scoreElement = document.querySelector('#score');
 let score = 0
 
+// Oyun haritasının temsili şablonu
+const map = [
+    ['1', '-', '-', '-', '-', '-', '-', '-', '-', '-', '2'],
+    ['|', ' ', '.', '.', '.', '.', '.', '.', '.', '.', '|'],
+    ['|', '.', 'b', '.', '[', '7', ']', '.', 'b', '.', '|'],
+    ['|', '.', '.', '.', '.', '_', '.', '.', '.', '.', '|'],
+    ['|', '.', '[', ']', '.', '.', '.', '[', ']', '.', '|'],
+    ['|', '.', '.', '.', '.', '^', '.', '.', '.', '.', '|'],
+    ['|', '.', 'b', '.', '[', '+', ']', '.', 'b', '.', '|'],
+    ['|', '.', '.', '.', '.', '_', '.', '.', '.', '.', '|'],
+    ['|', '.', '[', ']', '.', '.', '.', '[', ']', '.', '|'],
+    ['|', '.', '.', '.', '.', '^', '.', '.', '.', '.', '|'],
+    ['|', '.', 'b', '.', '[', '5', ']', '.', 'b', '.', '|'],
+    ['|', '.', '.', '.', '.', '.', '.', '.', '.', 'p', '|'],
+    ['4', '-', '-', '-', '-', '-', '-', '-', '-', '-', '3']
+];
+
 // Canvas boyut ayarlaması
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+// Haritayı oluşturacak resimlere ve haritaya göre boyut ayarı yapılıyor
+let imgWidth = imgHeight = 40;
+canvas.width = map[0].length * imgWidth;
+canvas.height = map.length * imgHeight;
 
 // Oyuncuların (pacman, hayaletler) aşmayacakları sınırı oluşturmak için kullanılan sınıf yapısı
 class Boundary {
@@ -168,22 +187,6 @@ const ghosts = [        // Oluşturulan hayaletler
     })
 ];
 
-// Oyun haritasının temsili şablonu
-const map = [
-    ['1', '-', '-', '-', '-', '-', '-', '-', '-', '-', '2'],
-    ['|', ' ', '.', '.', '.', '.', '.', '.', '.', '.', '|'],
-    ['|', '.', 'b', '.', '[', '7', ']', '.', 'b', '.', '|'],
-    ['|', '.', '.', '.', '.', '_', '.', '.', '.', '.', '|'],
-    ['|', '.', '[', ']', '.', '.', '.', '[', ']', '.', '|'],
-    ['|', '.', '.', '.', '.', '^', '.', '.', '.', '.', '|'],
-    ['|', '.', 'b', '.', '[', '+', ']', '.', 'b', '.', '|'],
-    ['|', '.', '.', '.', '.', '_', '.', '.', '.', '.', '|'],
-    ['|', '.', '[', ']', '.', '.', '.', '[', ']', '.', '|'],
-    ['|', '.', '.', '.', '.', '^', '.', '.', '.', '.', '|'],
-    ['|', '.', 'b', '.', '[', '5', ']', '.', 'b', '.', '|'],
-    ['|', '.', '.', '.', '.', '.', '.', '.', '.', 'p', '|'],
-    ['4', '-', '-', '-', '-', '-', '-', '-', '-', '-', '3']
-];
 
 // Her bir karakter (sembol) için gerekli resmi oluşturmak için tanımlanan metot
 function getImage(img) {
