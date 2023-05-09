@@ -1,0 +1,84 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,300&display=swap');
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background-color: black;
+    padding: 10px 20px;
+    text-align: center;
+}
+
+ul {
+    padding: 0;
+}
+
+.game-canvas{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.game-canvas p {
+    color: white;
+    font-family: sans-serif;
+    margin-block: 6px;
+}
+
+.menu-modal {
+    position: fixed;
+    height: 100vh;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    backdrop-filter: blur(5px);
+    transition: all .5s ease-in-out;
+}
+
+.how-to-play-modal {
+    display: none;
+    height: 250vh;
+    max-width: 80%;
+    margin-inline: auto;
+    transition: all .5s ease-in-out;
+}
+
+.how-to-play-modal li {
+    list-style: none;
+    text-align: left;
+    font-size: clamp(.5rem, 3vw, 2rem);
+    padding: .1rem 1rem;
+    margin-block: .75rem;
+    font-family: 'Roboto', sans-serif;
+    font-weight: 600;
+    border-radius: 5px;
+    background-color: #0E185F;
+    color: #d6d6d6;
+}
+
+button {
+    font-size: clamp(1rem, 5vw, 3rem);
+    padding: .1rem 1rem;
+    margin-block: clamp(.01rem, .5vw + .5vh, 1rem);
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700;
+    border: 5px rgba(0, 0, 0, 0) solid;
+    border-radius: 5px;
+    background-color: #0E185F;
+    color: #54E346;
+}
+
+button:hover {
+    border: 5px #54E346 solid;
+    cursor: pointer;
+}
