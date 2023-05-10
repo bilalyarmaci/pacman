@@ -4,8 +4,8 @@ Bu proje **Pacman** oyununun **JavaScript** uygulamasıdır. Web Tabanlı Progra
 
 
 ## Nasıl Oynanır?
-Oyunu herhangi bir bilgisayardaki tarayıcı üzerinden kolaylıkla deneyimleyebilirsiniz.
-**Oyun linki:** bilalyarmaci.github.io/web-oyun-projesi/
+Oyunu herhangi bir bilgisayardaki tarayıcı üzerinden kolaylıkla deneyimleyebilirsiniz. <br>
+**Oyun linki:** https://bilalyarmaci.github.io/web-oyun-projesi/
 
 ## Oyun Hakkında Bilgi
 Pacman oyunu, oyun tahtasındaki tüm hapları yiyerek seviyeleri tamamlamaya çalışırken hayaletlerden kaçan bir karakter olan Pacman'i kontrol ettiğiniz bir oyundur. Oyunun kuralları, karakterler ve seviyeler hakkında ayrıntılı bilgi, [Wikipedia](https://en.wikipedia.org/wiki/Pac-Man) sayfasında bulunabilir.
