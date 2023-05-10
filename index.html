@@ -80,8 +80,18 @@
 
         // Mobil veya tablet cihazın algılanması
         function isMobile() {
-            return navigator.maxTouchPoints > 0 && /Android|iPhone|iPad/i.test(navigator.userAgent);
+            const userAgent = navigator.userAgent.toLowerCase();
+            const mobileKeywords = ['android', 'iphone', 'ipad', 'windows phone', 'blackberry', 'nokia', 'opera mini', 'iemobile', 'kindle', 'silk'];
+
+            for (let keyword of mobileKeywords) {
+                if (userAgent.includes(keyword)) {
+                    return true;
+                }
+            }
+
+            return false;
         }
+
 
         if (isMobile()) {
             mobileDeviceModal.style.display = 'flex';
