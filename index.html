@@ -5,62 +5,90 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pacman Oyunu</title>
+    <link rel="icon" type="image/x-icon" href="img/
+    favicon.ico">
+    <!-- Bağlantılar -->
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+    <script src="index.js" defer></script>
 </head>
 
 <body>
-    <!-- Grafik arayüz için kullanılan modal; 'menü' modali -->
-    <div class="menu-modal">
-        <div class="menu-bg">
-            <div>
-                <button onclick="hideMenuModal(), startGame()" id="startBtn">Başla</button>
+    <!-- Bilgisayardan giriş yapıldığında görüntülenecek sayfa ayrı bir çerçeveye alınıyor -->
+    <div id="desktopDeviceModal">
+        <!-- Grafik arayüz için kullanılan modal; 'menü' modali -->
+        <div class="menu-modal">
+            <div class="menu-bg">
+                <div>
+                    <button onclick="hideMenuModal(), startGame()" id="startBtn">Başla</button>
+                </div>
+                <div>
+                    <button onclick="hideMenuModal(), showHTPModal()" id="howToPlayBtn">Nasıl oynanır?</button>
+                </div>
+                <div>
+                    <a href="https://github.com/bilalyarmaci/web-oyun-projesi" target="_blank"><button id="aboutBtn">
+                            <\>
+                        </button></a>
+                </div>
             </div>
+        </div>
+
+        <!-- Grafik arayüz için kullanılan modal; 'nasıl oynanır' modali -->
+        <div class="menu-modal how-to-play-modal">
             <div>
-                <button onclick="hideMenuModal(), showHTPModal()" id="howToPlayBtn">Nasıl oynanır?</button>
+                <a href="#" target="_blank"><button>🎥 VİDEOYU İZLE</button></a>
+                <ul>
+                    <li>Hareket için w-a-s-d tuşlarını kullanın.</li>
+                    <li>Güç hapı alındığında hayaletler korkacak ve yenilebilir hale gelecekler.</li>
+                    <li>Hayaletlere dokunmadan tüm hapları kapın ve oyunu kazanın!</li>
+                </ul>
+                <button id="backBtn" onclick="hideHTPModal(), showMenuModal()">Ana menü</button>
             </div>
-            <div>
-                <a href="https://github.com/bilalyarmaci/web-oyun-projesi" target="_blank"><button id="aboutBtn"><\></button></a>
+        </div>
+
+        <!-- Grafik arayüz için kullanılan modal; 'oyun kaybedildi' modali -->
+        <div class="menu-modal game-over-modal">
+            <div class="game-over-bg">
+                <h2>Oyunu kaybettin!</h2>
+                <button onclick="startGame(),hideGameOverModal()">Tekrar oyna</button>
             </div>
         </div>
-    </div>
 
-    <!-- Grafik arayüz için kullanılan modal; 'nasıl oynanır' modali -->
-    <div class="menu-modal how-to-play-modal">
-        <div>
-            <a href="#" target="_blank"><button>🎥 VİDEOYU İZLE</button></a>
-            <ul>
-                <li>Hareket için w-a-s-d tuşlarını kullanın.</li>
-                <li>Güç hapı alındığında hayaletler korkacak ve yenilebilir hale gelecekler.</li>
-                <li>Hayaletlere dokunmadan tüm hapları kapın ve oyunu kazanın!</li>
-            </ul>
-            <button id="backBtn" onclick="hideHTPModal(), showMenuModal()">Ana menü</button>
+        <!-- Grafik arayüz için kullanılan modal; 'oyun kazanıldı' modali -->
+        <div class="menu-modal win-modal">
+            <div class="win-bg">
+                <h2>Tebrikler! <br> Oyunu kazandın!</h2>
+                <button onclick="startGame(),hideWinModal()">Tekrar oyna</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Grafik arayüz için kullanılan modal; 'oyun kaybedildi' modali -->
-    <div class="menu-modal game-over-modal">
-        <div class="game-over-bg">
-            <h2>Oyunu kaybettin!</h2>
-            <button onclick="startGame(),hideGameOverModal()">Tekrar oyna</button>
+        <!-- Canvas ve skor -->
+        <div class="game-canvas">
+            <p><span>Skor: </span><span id="score">0</span></p>
+            <canvas></canvas>
         </div>
+
     </div>
 
-    <!-- Grafik arayüz için kullanılan modal; 'oyun kazanıldı' modali -->
-    <div class="menu-modal win-modal">
-        <div class="win-bg">
-            <h2>Tebrikler! <br> Oyunu kazandın!</h2>
-            <button onclick="startGame(),hideWinModal()">Tekrar oyna</button>
-        </div>
+    <!-- Mobil cihaz ve tabletlerle (dokunmatik olaylarla) uyumlu olmadığı için oyuna erişim engelleniyor. -->
+    <div id="mobileDeviceModal">
+        <h1 class="warning">Oyun sadece bilgisayardan oynanmayı desteklemektedir. Lütfen bilgisayar kullanınız.</h1>
     </div>
 
+    <!-- Uyumsuz cihaz için erişim engellemesi (JS kısmı) -->
+    <script>
+        const mobileDeviceModal = document.querySelector('#mobileDeviceModal');
+        const desktopDeviceModal = document.querySelector('#desktopDeviceModal');
 
-    <div class="game-canvas">
-        <p><span>Skor: </span><span id="score">0</span></p>
-        <canvas></canvas>
-    </div>
+        // Mobil veya tablet cihazın algılanması
+        function isMobile() {
+            return navigator.maxTouchPoints > 0 && /Android|iPhone|iPad/i.test(navigator.userAgent);
+        }
 
-    <script src="index.js"></script>
+        if (isMobile()) {
+            mobileDeviceModal.style.display = 'flex';
+            desktopDeviceModal.style.display = 'none';
+        }
+    </script>
 </body>
 
 </html>

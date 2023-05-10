@@ -36,7 +36,7 @@ ul {
     margin-block: 6px;
 }
 
-.menu-modal {
+.menu-modal, #mobileDeviceModal {
     position: fixed;
     height: 100vh;
     top: 0;
@@ -113,4 +113,18 @@ button:hover {
 
 .game-over-modal button:hover{
     border-color: black;
+}
+
+#mobileDeviceModal{
+    display: none;
+    max-width: 90%;
+    margin-inline: auto;
+}
+
+.warning{
+    color: red;
+    font-family: 'Roboto', sans-serif;
+    font-size: clamp(1rem, 3vw, 2.25rem);
+    background-color: #FFDEB9;
+    padding: 2rem .25rem;
 }
