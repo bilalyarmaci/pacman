@@ -54,7 +54,7 @@ class Boundary {
 class Pacman {
     // Boundary sınıfındaki yapıcının benzeri
     // Daire oluşturulduğundan yarıçap (radius) değeri de gereklidir
-    static speed = 5    // "Pacman"in hız ayarı için kullanılıyor
+    static speed = 2.5    // "Pacman"in hız ayarı için kullanılıyor
     constructor({ position, velocity }) {
         this.position = position;
         this.velocity = velocity;
